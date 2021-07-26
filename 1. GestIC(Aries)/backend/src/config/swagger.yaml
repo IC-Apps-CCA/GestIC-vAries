@@ -1,0 +1,1734 @@
+swagger: "2.0"
+info:
+  description: "GestIC App API documentation"
+  version: "1.0.0"
+  title: "GestIC API"
+host: "localhost:3333"
+
+tags:
+- name: "User"
+  description: "Operations related to users"
+- name: "File"
+  description: "Operations related to file manipulation"
+- name: "Project"
+  description: "Operations related to active projects"
+- name: "Class Offer"
+  description: "Operations related to class offers"
+- name: "Informatives"
+  description: "Operations related to informatives"
+- name: "Research groups"
+  description: "Operations related to reasearch groups"
+- name: "Events"
+  description: "Operations related to active events"
+
+paths:
+  /access/login:
+    post:
+      tags:
+      - "User"
+      summary: "Authentication and authorization of a registered user"
+      description: ""
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "body"
+        description: "Parameters used in user authentication"
+        required: true
+        schema:
+         type: "object"
+         properties:
+            email:
+              type: "string"
+            password:
+              type: "string"
+      responses:
+        "200":
+          description: "Successful login. profileTag can be ALUN or MONI or COOR or PROF."
+          schema:
+            allOf:
+              - $ref: "#/components/schemas/User"
+              - type: "object"
+                properties:
+                  password:
+                    type: "string"
+                    example: "******"
+                  profileTag:
+                    type: "string"
+                  auth:
+                    type: "boolean"
+                  token:
+                    example: 	"bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjA4OTI5NzE4LTU0ZGEtNDVmNy04YTVjLTQ2ZTg
+                    1ZTFjNzc2YyIsInByb2ZpbGVJZCI6IjIxZjMzOTJkLWZiZGMtNGNiMC04ZTNjLTVhMTFkNmMwNjlmMSIsImlhdCI6MTYxOTA1ODc3NSwiZXhw
+                    IjoxNjE5MDU5Njc1fQ.OpZp7wcmzolDnIZ12N2FVOQgrIhui6G0Ok6IEitRcUw"
+        "500":
+          description: "Unsuccessful login"
+          schema:
+            type: "object"
+            properties:
+              message:
+                type: "string"
+  /access/register:
+    post:
+      tags:
+      - "User"
+      summary: "Register a new user"
+      description: "Regis"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "body"
+        description: "Information required for registration"
+        required: true
+        schema:
+          type: "object"
+          properties:
+            name:
+              type: "string"
+            email:
+              type: "string"
+            password:
+              type: "string"
+              example: "******"
+      responses:
+        "200":
+          description: "Successful registration"
+          schema:
+            allOf:
+              - $ref: "#/components/schemas/User"
+              - type: "object"
+                properties:
+                  password:
+                    type: "string"
+                  profileTag:
+                    type: "string"
+        "500":
+          description: "Unsuccessful registration"
+          schema:
+            type: "object"
+            properties:
+              message:
+                type: "string"
+
+  /access/logout:
+    post:
+      tags:
+      - "User"
+      summary: "It does logout"
+      description: ""
+      produces: "application/json"
+      responses:
+        "200":
+          description: "sucessful logout"
+          schema:
+            type: "object"
+            properties:
+              auth:
+                type: "boolean"
+                example: "false"
+              token: null
+  /user:
+    put:
+      tags:
+      - "User"
+      summary: "Update user information"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "body"
+        description: "Any quantity of the following parameters can be sent, but id is required and
+        old_password and new_password must be sent together."
+        required: true
+        schema:
+          type: "object"
+          properties:
+            id:
+              type: "string"
+              format: "uuid"
+            profileId:
+              type: "string"
+              format: "uuid"
+            name:
+              type: "string"
+            status:
+              type: "boolean"
+            old_password:
+              type: "string"
+            new_password:
+              type: "string"
+      responses:
+        "200":
+          description: "Successful update"
+          schema:
+        "500":
+          description: "Unsuccessful update"
+          schema:
+            type: "object"
+            properties:
+              message:
+                type: "string"
+  /user/:id:
+    delete:
+      tags:
+      - "User"
+      summary: "Delete user"
+      produces:
+      - "application/json"
+      parameters:
+        - in: "param"
+          name: "id"
+          required: true
+          type: "string"
+          format: "uuid"
+      responses:
+        "200":
+          description: "Successful delete"
+          schema:
+            type: "object"
+            properties:
+              id:
+                type: "string"
+                format: "uuid"
+              profileId:
+                type: "string"
+                format: "uuid"
+              name:
+                type: "string"
+              email:
+                type: "string"
+              password:
+                type: "string"
+              status:
+                type: "boolean"
+        "500":
+          description: "Unsuccessful delete"
+          schema:
+            type: "object"
+            properties:
+              message:
+                type: "string"
+  /user/id?:
+    get:
+      tags:
+      - "User"
+      summary: "Get a user. If the id is specified returs the user which owns it. Else
+      returns user that made the request"
+      produces:
+      - "application/json"
+      parameters:
+        - in: param
+          name: id
+          required: false
+          type: string
+      responses:
+        "200":
+          description: "Returned the user"
+          schema:
+            allOf:
+            - $ref: "#/components/schemas/User"
+            - type: "object"
+              properties:
+                password:
+                  type: "string"
+                profileTag:
+                  type: "string"
+        "500":
+          description: "Could not return the user"
+          schema:
+            type: "object"
+            properties:
+              message:
+                type: "string"
+  /user/all/:status?:
+    get:
+      tags:
+      - "User"
+      summary: "Get users with optional status parameter"
+      produces:
+      - "application/json"
+      parameters:
+        - in: param
+          name: status
+          required: false
+          type: boolean
+      responses:
+        "200":
+          description: "Returned the list of users with optional status filter"
+          schema:
+            type: "array"
+            items:
+              type: "object"
+              properties:
+                id:
+                  type: "string"
+                  format: "uuid"
+                profileId:
+                  type: "string"
+                  format: "uuid"
+                name:
+                  type: "string"
+                email:
+                  type: "string"
+                status:
+                  type: "boolean"
+                  example: false
+        "500":
+          description: "Could not return a list of users with optional status filter"
+          schema:
+            type: "object"
+            properties:
+              message:
+                type: "string"
+  /file:
+    post:
+      tags:
+      - "File"
+      summary: "Upload a file"
+      produces:
+      - "application/json"
+      consumes:
+      - "multipart/form-data"
+      parameters:
+        - in: formData
+          name: file
+          type: file
+          required: true
+          description: The file to upload.
+        - in: formData
+          name: name
+          type: string
+          required: true
+          description: File name.
+        - in: formData
+          name: tag
+          type: string
+          required: true
+          description: File tag.
+      responses:
+        "200":
+          description: "Successful upload"
+          schema:
+            type: "object"
+            properties:
+              id:
+                type: "string"
+                format: "uuid"
+              name:
+                type: "string"
+              tag:
+                type: "string"
+              ref:
+                type: "string"
+        "500":
+          description: "Unsuccessful upload"
+          schema:
+            type: "object"
+            properties:
+              message:
+                type: "string"
+    get:
+      tags:
+      - "File"
+      summary: "Returns list of file references"
+      produces:
+        - "application/json"
+      consumes:
+        - "application/json"
+      parameters:
+        - in: body
+          name: body
+          required: false
+          schema:
+            type: "object"
+            properties:
+              tag:
+                type: "string"
+      responses:
+        "200":
+          description: "Successfully displayed all file references"
+          schema:
+            type: "array"
+            items:
+              type: "object"
+              properties:
+                id:
+                  type: "string"
+                  format: "uuid"
+                tag:
+                  type: "string"
+                name:
+                  type: "string"
+                ref:
+                  type: "string"
+        "500":
+          description: "Could not display all file references"
+          schema:
+            type: "object"
+            properties:
+              message:
+                type: "string"
+  /file/download:
+    get:
+      tags:
+      - "File"
+      summary: "Download a file"
+      produces:
+      - "application/pdf"
+      consumes:
+      - "application/json"
+      parameters:
+        - in: body
+          name: body
+          required: true
+          schema:
+            type: "object"
+            properties:
+              ref:
+                type: "string"
+      responses:
+        "200":
+          description: "Successful download"
+          schema:
+            type: "file"
+            produces: "application/pdf"
+            example: "file.pdf"
+        "500":
+          description: "Unsuccessful download"
+          schema:
+            type: "object"
+            properties:
+              message:
+                type: "string"
+  /project/all/type?:
+    get:
+      tags:
+      - "Project"
+      summary: "Get a list of all active projects"
+      produces:
+      - "application/json"
+      responses:
+        "200":
+          description: "Obtained a list of all active projects"
+          schema:
+            type: "array"
+            produces: "application/json"
+            items:
+              type: "object"
+              properties:
+                id:
+                  type: "string"
+                  format: "uuid"
+                owner:
+                  type: "string"
+                  format: "uuid"
+                name:
+                  type: "string"
+                description:
+                  type: "string"
+                type:
+                  type: "string"
+        "500":
+          description: "Could not obtain a list of all active projects"
+          schema:
+            type: "object"
+            properties:
+              message:
+                type: "string"
+  /project:
+    post:
+      tags:
+      - "Project"
+      summary: "Insert a project"
+      produces:
+      - "application/json"
+      consumes:
+      - "application/json"
+      parameters:
+        - in: body
+          name: body
+          required: true
+          schema:
+            type: "object"
+            properties:
+              name:
+                type: "string"
+              description:
+                type: "string"
+              type:
+                type: "string"
+      responses:
+        "200":
+          description: "Inserted a project"
+          schema:
+            type: "object"
+            properties:
+              id:
+                type: "string"
+                format: "uuid"
+              owner:
+                type: "string"
+                format: "uuid"
+              name:
+                type: "string"
+              description:
+                type: "string"
+              type:
+                type: "string"
+        "500":
+          description: "Could not insert a project"
+          schema:
+            type: "object"
+            properties:
+              message:
+                type: "string"
+    put:
+      tags:
+      - "Project"
+      summary: " Update project information"
+      produces:
+      - "application/json"
+      consumes:
+      - "application/json"
+      parameters:
+        - in: body
+          name: body
+          required: true
+          description: "Any quantity of the following parameters can be sent, but id is required."
+          schema:
+            type: "object"
+            properties:
+              id:
+                type: "string"
+                format: "uuid"
+              newOwner:
+                type: "string"
+                format: "uuid"
+              name:
+                type: "string"
+              description:
+                type: "string"
+              type:
+                type: "string"
+      responses:
+        "200":
+          description: "Sucessfully updated a project"
+          schema:
+            type: "object"
+            properties:
+              id:
+                type: "string"
+                format: "uuid"
+              owner:
+                type: "string"
+                format: "uuid"
+              name:
+                type: "string"
+              description:
+                type: "string"
+              type:
+                type: "string"
+        "500":
+          description: "Could not update a project"
+          schema:
+            type: "object"
+            properties:
+              message:
+                type: "string"
+  /project/:id:
+    get:
+      tags:
+        - "Project"
+      summary: "Get project information"
+      produces:
+      - "application/json"
+      parameters:
+        - in: param
+          name: id
+          required: true
+          type: string
+          format: "uuid"
+      responses:
+        "200":
+          description: "Obtained a project"
+          schema:
+            type: "object"
+            properties:
+              id:
+                type: "string"
+                format: "uuid"
+              owner:
+                type: "string"
+                format: "uuid"
+              name:
+                type: "string"
+              description:
+                type: "string"
+              type:
+                type: "string"
+              members:
+                type: "array"
+                items:
+                  type: "object"
+                  properties:
+                    id:
+                      type: "string"
+                      format: "uuid"
+                    name:
+                      type: "string"
+                    email:
+                      type: "string"
+        "500":
+          description: "Could not obtain a project"
+          schema:
+            type: "object"
+            properties:
+              message:
+                type: "string"
+    delete:
+      tags:
+        - "Project"
+      summary: "Delete project"
+      produces:
+      - "application/json"
+      parameters:
+        - in: param
+          name: id
+          required: true
+          type: string
+          format: "uuid"
+      responses:
+        "200":
+          description: "Successfully removed a project"
+          schema:
+            type: "object"
+            properties:
+              id:
+                type: "string"
+                format: "uuid"
+              owner:
+                type: "string"
+                format: "uuid"
+              name:
+                type: "string"
+              description:
+                type: "string"
+              type:
+                type: "string"
+        "500":
+          description: "Could not remove a project"
+          schema:
+            type: "object"
+            properties:
+              message:
+                type: "string"
+  /project/members:
+    post:
+      tags:
+        - "Project"
+      summary: "Add a member to project"
+      produces:
+      - "application/json"
+      consumes:
+      - "application/json"
+      parameters:
+        - in: body
+          name: body
+          required: true
+          schema:
+            type: "object"
+            properties:
+              id:
+                type: "string"
+                format: "uuid"
+              userId:
+                type: "string"
+                format: "uuid"
+      responses:
+        "200":
+          description: "Added a member"
+          schema:
+            type: "object"
+            properties:
+              id:
+                type: "string"
+                format: "uuid"
+              owner:
+                type: "string"
+                format: "uuid"
+              name:
+                type: "string"
+              description:
+                type: "string"
+              type:
+                type: "string"
+              members:
+                type: "array"
+                items:
+                  type: "object"
+                  properties:
+                    id:
+                      type: "string"
+                      format: "uuid"
+                    name:
+                      type: "string"
+                    email:
+                      type: "string"
+        "500":
+          description: "Could not add a member to project"
+          schema:
+            type: "object"
+            properties:
+              message:
+                type: "string"
+    delete:
+      tags:
+        - "Project"
+      summary: "Remove a member from project"
+      produces:
+      - "application/json"
+      consumes:
+      - "application/json"
+      parameters:
+        - in: body
+          name: body
+          required: true
+          schema:
+            type: "object"
+            properties:
+              id:
+                type: "string"
+                format: "uuid"
+              userId:
+                type: "string"
+                format: "uuid"
+      responses:
+        "200":
+          description: "Removed a member"
+          schema:
+            type: "object"
+            properties:
+              id:
+                type: "string"
+                format: "uuid"
+              owner:
+                type: "string"
+                format: "uuid"
+              name:
+                type: "string"
+              description:
+                type: "string"
+              type:
+                type: "string"
+              members:
+                type: "array"
+                items:
+                  type: "object"
+                  properties:
+                    id:
+                      type: "string"
+                      format: "uuid"
+                    name:
+                      type: "string"
+                    email:
+                      type: "string"
+        "500":
+          description: "Could not remove a member from project"
+          schema:
+            type: "object"
+            properties:
+              message:
+                type: "string"
+
+  /offer:
+    get:
+      tags:
+      - "Class Offer"
+      summary: "Get a list of all class offers"
+      produces:
+      - "application/json"
+      responses:
+        "200":
+          description: "Obtained a list of all class offers"
+          schema:
+            type: "array"
+            produces: "application/json"
+            items:
+              type: "object"
+              properties:
+                id:
+                  type: "string"
+                  format: "uuid"
+                name:
+                  type: "string"
+                code:
+                  type: "string"
+                codeClassroom:
+                  type: "string"
+                linkClassroom:
+                  type: "string"
+                linkMeets:
+                  type: "string"
+                linkWpp:
+                  type: "string"
+                linkTel:
+                  type: "string"
+        "500":
+          description: "Could not obtain a list of all class offers"
+          schema:
+            type: "object"
+            properties:
+              message:
+                type: "string"
+    post:
+      tags:
+      - "Class Offer"
+      summary: "Insert a class offer"
+      produces:
+      - "application/json"
+      consumes:
+      - "application/json"
+      parameters:
+        - in: body
+          name: body
+          required: true
+          schema:
+            type: "object"
+            properties:
+              name:
+                type: "string"
+              code:
+                type: "string"
+              codeClassroom:
+                type: "string"
+              linkClassroom:
+                type: "string"
+              linkMeets:
+                type: "string"
+              linkWpp:
+                type: "string"
+              linkTel:
+                type: "string"
+      responses:
+        "200":
+          description: "Inserted a class offer"
+          schema:
+            type: "object"
+            properties:
+              id:
+                type: "string"
+                format: "uuid"
+              name:
+                type: "string"
+              code:
+                type: "string"
+              codeClassroom:
+                type: "string"
+              linkClassroom:
+                type: "string"
+              linkMeets:
+                type: "string"
+              linkWpp:
+                type: "string"
+              linkTel:
+                type: "string"
+        "500":
+          description: "Could not insert a class offer"
+          schema:
+            type: "object"
+            properties:
+              message:
+                type: "string"
+    put:
+      tags:
+      - "Class Offer"
+      summary: " Update class offer information"
+      produces:
+      - "application/json"
+      consumes:
+      - "application/json"
+      parameters:
+        - in: body
+          name: body
+          required: true
+          description: "Any quantity of the following parameters can be sent, but id is required."
+          schema:
+            type: "object"
+            properties:
+              id:
+                type: "string"
+                format: "uuid"
+              name:
+                type: "string"
+              code:
+                type: "string"
+              codeClassroom:
+                type: "string"
+              linkClassroom:
+                type: "string"
+              linkMeets:
+                type: "string"
+              linkWpp:
+                type: "string"
+              linkTel:
+                type: "string"
+      responses:
+        "200":
+          description: "Sucessfully updated a class offer"
+          schema:
+            type: "object"
+            properties:
+              id:
+                type: "string"
+                format: "uuid"
+              name:
+                type: "string"
+              code:
+                type: "string"
+              codeClassroom:
+                type: "string"
+              linkClassroom:
+                type: "string"
+              linkMeets:
+                type: "string"
+              linkWpp:
+                type: "string"
+              linkTel:
+                type: "string"
+        "500":
+          description: "Could not update a class offer"
+          schema:
+            type: "object"
+            properties:
+              message:
+                type: "string"
+    delete:
+      tags:
+        - "Class Offer"
+      summary: "Delete all class offers"
+      produces:
+      - "application/json"
+      responses:
+        "200":
+          description: "Successfully removed all class offers"
+          schema:
+            type: "array"
+            produces: "application/json"
+            items:
+              type: "object"
+              properties:
+                id:
+                  type: "string"
+                  format: "uuid"
+                owner:
+                  type: "string"
+                  format: "uuid"
+                name:
+                  type: "string"
+                code:
+                  type: "string"
+                codeClassroom:
+                  type: "string"
+                linkClassroom:
+                  type: "string"
+                linkMeets:
+                  type: "string"
+                linkWpp:
+                  type: "string"
+                linkTel:
+                  type: "string"
+        "500":
+          description: "Could not remove all class offers"
+          schema:
+            type: "object"
+            properties:
+              message:
+                type: "string"
+  /offer/:id:
+    get:
+      tags:
+        - "Class Offer"
+      summary: "Get class offer information"
+      produces:
+      - "application/json"
+      parameters:
+        - in: param
+          name: id
+          required: true
+          type: string
+          format: "uuid"
+      responses:
+        "200":
+          description: "Obtained a class offer"
+          schema:
+            type: "object"
+            properties:
+              id:
+                type: "string"
+                format: "uuid"
+              owner:
+                type: "string"
+                format: "uuid"
+              name:
+                type: "string"
+              code:
+                type: "string"
+              codeClassroom:
+                type: "string"
+              linkClassroom:
+                type: "string"
+              linkMeets:
+                type: "string"
+              linkWpp:
+                type: "string"
+              linkTel:
+                type: "string"
+        "500":
+          description: "Could not obtain a class offer"
+          schema:
+            type: "object"
+            properties:
+              message:
+                type: "string"
+    delete:
+      tags:
+        - "Class Offer"
+      summary: "Delete class offer"
+      produces:
+      - "application/json"
+      parameters:
+        - in: param
+          name: id
+          required: true
+          type: string
+          format: "uuid"
+      responses:
+        "200":
+          description: "Successfully removed a class offer"
+          schema:
+            type: "object"
+            properties:
+              id:
+                type: "string"
+                format: "uuid"
+              owner:
+                type: "string"
+                format: "uuid"
+              name:
+                type: "string"
+              code:
+                type: "string"
+              codeClassroom:
+                type: "string"
+              linkClassroom:
+                type: "string"
+              linkMeets:
+                type: "string"
+              linkWpp:
+                type: "string"
+              linkTel:
+                type: "string"
+        "500":
+          description: "Could not remove a class offer"
+          schema:
+            type: "object"
+            properties:
+              message:
+                type: "string"
+  /informative:
+    get:
+      tags:
+      - "Informatives"
+      summary: "Get a list of all informatives"
+      produces:
+      - "application/json"
+      responses:
+        "200":
+          description: "Obtained a list of all informatives"
+          schema:
+            type: "array"
+            produces: "application/json"
+            items:
+              type: "object"
+              properties:
+                id:
+                  type: "string"
+                  format: "uuid"
+                owner:
+                  type: "string"
+                  format: "uuid"
+                title:
+                  type: "string"
+                content:
+                  type: "string"
+        "500":
+          description: "Could not obtain a list of all informatives"
+          schema:
+            type: "object"
+            properties:
+              message:
+                type: "string"
+    post:
+      tags:
+      - "Informatives"
+      summary: "Insert a informative"
+      produces:
+      - "application/json"
+      consumes:
+      - "application/json"
+      parameters:
+        - in: body
+          name: body
+          required: true
+          schema:
+            type: "object"
+            properties:
+              title:
+                type: "string"
+              content:
+                type: "string"
+      responses:
+        "200":
+          description: "Inserted a informative"
+          schema:
+            type: "object"
+            properties:
+              id:
+                type: "string"
+                format: "uuid"
+              owner:
+                type: "string"
+                format: "uuid"
+              title:
+                type: "string"
+              content:
+                type: "string"
+        "500":
+          description: "Could not insert a informative"
+          schema:
+            type: "object"
+            properties:
+              message:
+                type: "string"
+    put:
+      tags:
+      - "Informatives"
+      summary: " Update informative information"
+      produces:
+      - "application/json"
+      consumes:
+      - "application/json"
+      parameters:
+        - in: body
+          name: body
+          required: true
+          description: "Any quantity of the following parameters can be sent, but id is required."
+          schema:
+            type: "object"
+            properties:
+              id:
+                type: "string"
+                format: "uuid"
+              title:
+                type: "string"
+              content:
+                type: "string"
+      responses:
+        "200":
+          description: "Sucessfully updated a informative"
+          schema:
+            type: "object"
+            properties:
+              id:
+                type: "string"
+                format: "uuid"
+              owner:
+                type: "string"
+                format: "uuid"
+              title:
+                type: "string"
+              content:
+                type: "string"
+        "500":
+          description: "Could not update a informative"
+          schema:
+            type: "object"
+            properties:
+              message:
+                type: "string"
+  /informative/:id:
+    get:
+      tags:
+        - "Informatives"
+      summary: "Get informative information"
+      produces:
+      - "application/json"
+      parameters:
+        - in: param
+          name: id
+          required: true
+          type: string
+          format: "uuid"
+      responses:
+        "200":
+          description: "Obtained a informative"
+          schema:
+            type: "object"
+            properties:
+              id:
+                type: "string"
+                format: "uuid"
+              owner:
+                type: "string"
+                format: "uuid"
+              title:
+                type: "string"
+              content:
+                type: "string"
+        "500":
+          description: "Could not obtain a informative"
+          schema:
+            type: "object"
+            properties:
+              message:
+                type: "string"
+    delete:
+      tags:
+        - "Informatives"
+      summary: "Delete informative"
+      produces:
+      - "application/json"
+      parameters:
+        - in: param
+          name: id
+          required: true
+          type: string
+          format: "uuid"
+      responses:
+        "200":
+          description: "Successfully removed a informative"
+          schema:
+            type: "object"
+            properties:
+              id:
+                type: "string"
+                format: "uuid"
+              owner:
+                type: "string"
+                format: "uuid"
+              title:
+                type: "string"
+              content:
+                type: "string"
+        "500":
+          description: "Could not remove a informative"
+          schema:
+            type: "object"
+            properties:
+              message:
+                type: "string"
+  /research:
+    get:
+      tags:
+      - "Research groups"
+      summary: "Get a list of all research groups"
+      produces:
+      - "application/json"
+      responses:
+        "200":
+          description: "Obtained a list of all active research groups"
+          schema:
+            type: "array"
+            produces: "application/json"
+            items:
+              type: "object"
+              properties:
+                id:
+                  type: "string"
+                  format: "uuid"
+                owner:
+                  type: "string"
+                  format: "uuid"
+                name:
+                  type: "string"
+                description:
+                  type: "string"
+                activities:
+                  type: "string"
+        "500":
+          description: "Could not obtain a list of all active research groups"
+          schema:
+            type: "object"
+            properties:
+              message:
+                type: "string"
+    post:
+      tags:
+      - "Research groups"
+      summary: "Insert a research group"
+      produces:
+      - "application/json"
+      consumes:
+      - "application/json"
+      parameters:
+        - in: body
+          name: body
+          required: true
+          schema:
+            type: "object"
+            properties:
+              name:
+                type: "string"
+              description:
+                type: "string"
+              activities:
+                type: "string"
+      responses:
+        "200":
+          description: "Inserted a research group"
+          schema:
+            type: "object"
+            properties:
+              id:
+                type: "string"
+                format: "uuid"
+              owner:
+                type: "string"
+                format: "uuid"
+              name:
+                type: "string"
+              description:
+                type: "string"
+              activities:
+                type: "string"
+        "500":
+          description: "Could not insert a research group"
+          schema:
+            type: "object"
+            properties:
+              message:
+                type: "string"
+    put:
+      tags:
+      - "Research groups"
+      summary: " Update research group information"
+      produces:
+      - "application/json"
+      consumes:
+      - "application/json"
+      parameters:
+        - in: body
+          name: body
+          required: true
+          description: "Any quantity of the following parameters can be sent, but id is required."
+          schema:
+            type: "object"
+            properties:
+              id:
+                type: "string"
+                format: "uuid"
+              name:
+                type: "string"
+              description:
+                type: "string"
+              activities:
+                type: "string"
+      responses:
+        "200":
+          description: "Sucessfully updated a research group"
+          schema:
+            type: "object"
+            properties:
+              id:
+                type: "string"
+                format: "uuid"
+              owner:
+                type: "string"
+                format: "uuid"
+              name:
+                type: "string"
+              description:
+                type: "string"
+              activities:
+                type: "string"
+        "500":
+          description: "Could not update a research group"
+          schema:
+            type: "object"
+            properties:
+              message:
+                type: "string"
+  /research/:id:
+    get:
+      tags:
+        - "Research groups"
+      summary: "Get research group information"
+      produces:
+      - "application/json"
+      parameters:
+        - in: param
+          name: id
+          required: true
+          type: string
+          format: "uuid"
+      responses:
+        "200":
+          description: "Obtained a research group"
+          schema:
+            type: "object"
+            properties:
+              id:
+                type: "string"
+                format: "uuid"
+              owner:
+                type: "string"
+                format: "uuid"
+              name:
+                type: "string"
+              description:
+                type: "string"
+              activities:
+                type: "string"
+              members:
+                type: "array"
+                items:
+                  type: "object"
+                  properties:
+                    id:
+                      type: "string"
+                      format: "uuid"
+                    name:
+                      type: "string"
+                    email:
+                      type: "string"
+        "500":
+          description: "Could not obtain a research group"
+          schema:
+            type: "object"
+            properties:
+              message:
+                type: "string"
+    delete:
+      tags:
+        - "Research groups"
+      summary: "Delete research group"
+      produces:
+      - "application/json"
+      parameters:
+        - in: param
+          name: id
+          required: true
+          type: string
+          format: "uuid"
+      responses:
+        "200":
+          description: "Successfully removed a research group"
+          schema:
+            type: "object"
+            properties:
+              id:
+                type: "string"
+                format: "uuid"
+              owner:
+                type: "string"
+                format: "uuid"
+              userId:
+                type: "string"
+                format: "uuid"
+              name:
+                type: "string"
+              description:
+                type: "string"
+        "500":
+          description: "Could not remove a research group"
+          schema:
+            type: "object"
+            properties:
+              message:
+                type: "string"
+
+  /research/members:
+    post:
+      tags:
+        - "Research groups"
+      summary: "Add a member to research group"
+      produces:
+      - "application/json"
+      consumes:
+      - "application/json"
+      parameters:
+        - in: body
+          name: body
+          required: true
+          schema:
+            type: "object"
+            properties:
+              id:
+                type: "string"
+                format: "uuid"
+              userId:
+                type: "string"
+                format: "uuid"
+      responses:
+        "200":
+          description: "Added a member"
+          schema:
+            type: "object"
+            properties:
+              id:
+                type: "string"
+                format: "uuid"
+              owner:
+                type: "string"
+                format: "uuid"
+              name:
+                type: "string"
+              description:
+                type: "string"
+              activities:
+                type: "string"
+              members:
+                type: "array"
+                items:
+                  type: "object"
+                  properties:
+                    id:
+                      type: "string"
+                      format: "uuid"
+                    name:
+                      type: "string"
+                    email:
+                      type: "string"
+        "500":
+          description: "Could not add a member to research group"
+          schema:
+            type: "object"
+            properties:
+              message:
+                type: "string"
+    delete:
+      tags:
+        - "Research groups"
+      summary: "Remove a member from research group"
+      produces:
+      - "application/json"
+      consumes:
+      - "application/json"
+      parameters:
+        - in: body
+          name: body
+          required: true
+          schema:
+            type: "object"
+            properties:
+              id:
+                type: "string"
+                format: "uuid"
+              userId:
+                type: "string"
+                format: "uuid"
+      responses:
+        "200":
+          description: "Removed a member"
+          schema:
+            type: "object"
+            properties:
+              id:
+                type: "string"
+                format: "uuid"
+              owner:
+                type: "string"
+                format: "uuid"
+              name:
+                type: "string"
+              description:
+                type: "string"
+              activities:
+                type: "string"
+              members:
+                type: "array"
+                items:
+                  type: "object"
+                  properties:
+                    id:
+                      type: "string"
+                      format: "uuid"
+                    name:
+                      type: "string"
+                    email:
+                      type: "string"
+        "500":
+          description: "Could not remove a member from research group"
+          schema:
+            type: "object"
+            properties:
+              message:
+                type: "string"
+
+  /event:
+    get:
+      tags:
+      - "Events"
+      summary: "Get a list of all events"
+      produces:
+      - "application/json"
+      responses:
+        "200":
+          description: "Obtained a list of all events"
+          schema:
+            type: "array"
+            produces: "application/json"
+            items:
+              schema:
+                $ref: "#/components/schemas/Event"
+        "500":
+          description: "Could not obtain a list of all events"
+          schema:
+            type: "object"
+            properties:
+              message:
+                type: "string"
+    post:
+      tags:
+      - "Events"
+      summary: "Insert a event"
+      produces:
+      - "application/json"
+      consumes:
+      - "application/json"
+      parameters:
+        - in: body
+          name: body
+          required: true
+          schema:
+            $ref: "#/components/schemas/Event"
+      responses:
+        "200":
+          description: "Inserted a class offer"
+          schema:
+            $ref: "#/components/schemas/Event"
+        "500":
+          description: "Could not insert a class offer"
+          schema:
+            type: "object"
+            properties:
+              message:
+                type: "string"
+    put:
+      tags:
+      - "Events"
+      summary: " Update class offer information"
+      produces:
+      - "application/json"
+      consumes:
+      - "application/json"
+      parameters:
+        - in: body
+          name: body
+          required: true
+          description: "Any quantity of the following parameters can be sent, but id is required."
+          schema:
+            $ref: "#/components/schemas/Event"
+      responses:
+        "200":
+          description: "Sucessfully updated a class offer"
+          schema:
+            $ref: "#/components/schemas/Event"
+        "500":
+          description: "Could not update a class offer"
+          schema:
+            type: "object"
+            properties:
+              message:
+                type: "string"
+  /event/:id:
+    get:
+      tags:
+        - "Events"
+      summary: "Get class offer information"
+      produces:
+      - "application/json"
+      parameters:
+        - in: param
+          name: id
+          required: true
+          type: string
+          format: "uuid"
+      responses:
+        "200":
+          description: "Obtained a class offer"
+          schema:
+            $ref: "#/components/schemas/Event"
+        "500":
+          description: "Could not obtain a class offer"
+          schema:
+            type: "object"
+            properties:
+              message:
+                type: "string"
+    delete:
+      tags:
+        - "Events"
+      summary: "Delete class offer"
+      produces:
+      - "application/json"
+      parameters:
+        - in: param
+          name: id
+          required: true
+          type: string
+          format: "uuid"
+      responses:
+        "200":
+          description: "Successfully removed a class offer"
+          schema:
+            $ref: "#/components/schemas/Event"
+        "500":
+          description: "Could not remove a class offer"
+          schema:
+            type: "object"
+            properties:
+              message:
+                type: "string"
+
+components:
+  schemas:
+    User:
+      type: "object"
+      properties:
+        id:
+          type: "string"
+          format: "uuid"
+        profileId:
+          type: "string"
+          format: "uuid"
+        name:
+          type: "string"
+        email:
+          type: "string"
+        status:
+          type: "boolean"
+
+      Event:
+      type: "object"
+      properties:
+        id:
+          type: "string"
+          format: "uuid"
+        start:
+          type: "string"
+          format: "date-time"
+        end:
+          type: "string"
+          format: "date-time"
+        title:
+          type: "string"
+        description:
+          type: "string"
