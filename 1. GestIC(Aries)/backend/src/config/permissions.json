@@ -1,0 +1,24 @@
+{
+  "research": {
+    "create": ["COOR", "TEC", "PROF"],
+    "edit": ["TEC", "COOR"]
+  },
+  "project": {
+    "create": ["COOR", "TEC", "PROF"],
+    "edit": ["TEC", "COOR"]
+  },
+  "informative": {
+    "create": ["COOR", "TEC", "PROF"],
+    "edit": ["TEC", "COOR"]
+  },
+  "offer": {
+    "create": ["COOR", "TEC", "PROF"],
+    "edit": ["TEC", "COOR"],
+    "deleteAll": ["TEC", "COOR"]
+  },
+  "user": ["TEC", "COOR"],
+  "event": {
+    "create": ["COOR", "TEC"],
+    "edit": ["COOR", "TEC"]
+  }
+}
